@@ -1,0 +1,15 @@
+{
+  "status": "blocked",
+  "revision": "replace-with-current-fingerprint",
+  "evidence": [],
+  "reason": "Complete the review and attach private workspace evidence before changing status.",
+  "findings": [
+    {
+      "id": "SEC-001",
+      "severity": "high",
+      "confidence": 0.9,
+      "summary": "Replace with an evidence-backed finding, or remove this example.",
+      "status": "open"
+    }
+  ]
+}

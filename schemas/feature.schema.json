@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dev-agent.local/schemas/feature.schema.json",
+  "title": "Durable feature lifecycle evidence",
+  "description": "Scaffold strings may be empty, but gates require nonempty requirement and all six option plans. Design revision hashes canonical requirement, all options, and selectedOption. Other reports bind the current source fingerprint. Runtime additionally enforces contained existing evidence paths, no symlinks, current approvals and exception expiry.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "id", "requirement", "options", "selectedOption", "designRevision", "approvals", "reports", "release", "dependenciesRemediated"],
+  "$defs": {
+    "text": {"type": "string", "pattern": "\\S"},
+    "revision": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "timestamp": {"type": "string", "format": "date-time", "pattern": "^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(?:\\.\\d+)?(?:Z|[+-]\\d\\d:\\d\\d)$"},
+    "approval": {
+      "oneOf": [{"type": "null"}, {
+        "type": "object", "additionalProperties": false, "required": ["by", "at", "revision"],
+        "properties": {"by": {"$ref": "#/$defs/text"}, "at": {"$ref": "#/$defs/timestamp"}, "revision": {"$ref": "#/$defs/revision"}}
+      }]
+    },
+    "finding": {
+      "type": "object", "additionalProperties": false, "required": ["id", "severity", "confidence", "summary", "status"],
+      "properties": {
+        "id": {"$ref": "#/$defs/text"}, "severity": {"enum": ["critical", "high", "medium", "low"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}, "summary": {"$ref": "#/$defs/text"},
+        "status": {"enum": ["open", "fixed", "accepted"]},
+        "exception": {
+          "type": "object", "additionalProperties": false, "required": ["approvedBy", "expiresAt", "reason"],
+          "properties": {"approvedBy": {"$ref": "#/$defs/text"}, "expiresAt": {"$ref": "#/$defs/timestamp"}, "reason": {"$ref": "#/$defs/text"}}
+        }
+      }
+    },
+    "report": {
+      "oneOf": [{"type": "null"}, {
+        "type": "object", "additionalProperties": false, "required": ["status", "revision", "evidence"],
+        "properties": {
+          "status": {"enum": ["passed", "failed", "blocked", "not-applicable"]},
+          "revision": {"$ref": "#/$defs/revision"},
+          "evidence": {"type": "array", "items": {"$ref": "project.schema.json#/$defs/path"}},
+          "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+          "reason": {"$ref": "#/$defs/text"}
+        },
+        "if": {"properties": {"status": {"const": "not-applicable"}}},
+        "then": {"required": ["reason"]}
+      }]
+    }
+  },
+  "properties": {
+    "schemaVersion": {"const": 1}, "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "requirement": {"type": "string"},
+    "options": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "implementationPlan", "testingPlan", "rollbackPlan", "debuggingPlan", "documentationPlan", "rolloutPlan"],
+        "properties": {
+          "id": {"$ref": "#/$defs/text"}, "implementationPlan": {"type": "string"}, "testingPlan": {"type": "string"},
+          "rollbackPlan": {"type": "string"}, "debuggingPlan": {"type": "string"}, "documentationPlan": {"type": "string"}, "rolloutPlan": {"type": "string"}
+        }
+      }
+    },
+    "selectedOption": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/text"}]},
+    "designRevision": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/revision"}]},
+    "approvals": {
+      "type": "object", "additionalProperties": false, "required": ["design", "deployment"],
+      "properties": {"design": {"$ref": "#/$defs/approval"}, "deployment": {"$ref": "#/$defs/approval"}}
+    },
+    "reports": {
+      "type": "object", "additionalProperties": false, "required": ["designSecurity", "implementationSecurity", "review", "tests", "documentation", "rollbackRehearsal"],
+      "properties": {
+        "designSecurity": {"$ref": "#/$defs/report"}, "implementationSecurity": {"$ref": "#/$defs/report"}, "review": {"$ref": "#/$defs/report"},
+        "tests": {"$ref": "#/$defs/report"}, "documentation": {"$ref": "#/$defs/report"}, "rollbackRehearsal": {"$ref": "#/$defs/report"}
+      }
+    },
+    "release": {
+      "oneOf": [{"type": "null"}, {
+        "type": "object", "additionalProperties": false, "required": ["revision", "environment", "verified", "at"],
+        "properties": {"revision": {"$ref": "#/$defs/revision"}, "environment": {"$ref": "#/$defs/text"}, "verified": {"type": "boolean"}, "at": {"$ref": "#/$defs/timestamp"}}
+      }]
+    },
+    "dependenciesRemediated": {"type": "boolean"}
+  }
+}

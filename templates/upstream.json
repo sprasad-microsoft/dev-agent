@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "framework": "Superpowers",
+  "repository": "https://github.com/obra/superpowers",
+  "reviewBaseline": "22f0b463e7a5e579904dd6211a520321035526f7",
+  "enabled": false,
+  "reusedWorkflows": [
+    "brainstorming",
+    "writing-plans",
+    "executing-plans",
+    "test-driven-development",
+    "systematic-debugging",
+    "verification-before-completion"
+  ],
+  "installation": "Review a pinned upstream release and explicitly install the compatible plugin. Never auto-install or vendor upstream instructions."
+}

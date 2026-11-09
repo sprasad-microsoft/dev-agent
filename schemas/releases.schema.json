@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dev-agent.local/schemas/releases.schema.json",
+  "title": "Supported release dependency inventories",
+  "description": "Both refs must be existing contained CycloneDX or SPDX 2.x JSON inventories with exact versions, including transitive components. Empty inventories, unsupported releases and unremediated releases block the check. This is not a vulnerability scan or proof of SBOM completeness.",
+  "type": "object", "additionalProperties": false, "required": ["schemaVersion", "releases"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "releases": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "revision", "supported", "runtimeSbom", "buildSbom", "environment", "remediated"],
+        "properties": {
+          "id": {"$ref": "feature.schema.json#/$defs/text"}, "revision": {"$ref": "feature.schema.json#/$defs/revision"},
+          "supported": {"type": "boolean"}, "runtimeSbom": {"$ref": "project.schema.json#/$defs/path"}, "buildSbom": {"$ref": "project.schema.json#/$defs/path"},
+          "environment": {"$ref": "feature.schema.json#/$defs/text"}, "remediated": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

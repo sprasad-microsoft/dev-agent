@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+
+# Add entries for the consumer's actual package ecosystems and directories.
+# Dependency alerts must additionally be enabled in repository settings.

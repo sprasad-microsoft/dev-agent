@@ -1,0 +1,12 @@
+node_modules/
+coverage/
+dist/
+tests/.work-*/
+.dev-agent/features/
+.dev-agent/evidence/
+.dev-agent/history/
+.dev-agent/security-results/
+*.log
+.env
+.env.*
+!.env.example

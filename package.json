@@ -1,0 +1,24 @@
+{
+  "name": "@sprasad-microsoft/dev-agent",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Workspace-aware development lifecycle agents, skills, and evidence gates for GitHub Copilot.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.8.0"
+  },
+  "bin": {
+    "dev-agent": "scripts/dev-agent.mjs"
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "node --experimental-test-coverage --test --test-coverage-exclude=\"**/*.test.mjs\" --test-coverage-exclude=\"tests/**\" --test-coverage-lines=90 --test-coverage-branches=85 --test-coverage-functions=90",
+    "validate": "node scripts/validate-package.mjs",
+    "check": "npm run validate && npm test",
+    "monitor": "node scripts/monitor-dependencies.mjs"
+  },
+  "devDependencies": {
+    "yaml": "2.9.1"
+  }
+}

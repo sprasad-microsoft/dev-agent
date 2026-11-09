@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dev-agent.local/schemas/project.schema.json",
+  "title": "Dev agent workspace project",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "project", "skills", "commands", "knowledge", "security", "monitoring", "review"],
+  "$defs": {
+    "text": {"type": "string", "pattern": "\\S"},
+    "path": {"type": "string", "pattern": "^(?![\\\\/])(?![A-Za-z]:)(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$))(?!.*:)(?!.*\\u0000).+"},
+    "command": {"oneOf": [{"$ref": "#/$defs/text"}, {"type": "null"}]},
+    "repository": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,38}/[A-Za-z0-9_][A-Za-z0-9_.-]{0,99}$"}
+  },
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "project": {
+      "type": "object", "additionalProperties": false, "required": ["name", "onboardingComplete"],
+      "properties": {"name": {"$ref": "#/$defs/text"}, "onboardingComplete": {"type": "boolean"}}
+    },
+    "skills": {
+      "type": "object", "additionalProperties": false,
+      "required": ["design", "implementation", "testing", "debugging", "deployment", "documentation", "security", "dependency-security", "review", "knowledge-base"],
+      "properties": {
+        "design": {"$ref": "#/$defs/path"}, "implementation": {"$ref": "#/$defs/path"}, "testing": {"$ref": "#/$defs/path"},
+        "debugging": {"$ref": "#/$defs/path"}, "deployment": {"$ref": "#/$defs/path"}, "documentation": {"$ref": "#/$defs/path"},
+        "security": {"$ref": "#/$defs/path"}, "dependency-security": {"$ref": "#/$defs/path"}, "review": {"$ref": "#/$defs/path"}, "knowledge-base": {"$ref": "#/$defs/path"}
+      }
+    },
+    "commands": {
+      "type": "object", "additionalProperties": false,
+      "required": ["build", "unit", "functional", "faultInjection", "coverage", "performance", "security", "deploy", "rollback"],
+      "properties": {
+        "build": {"$ref": "#/$defs/command"}, "unit": {"$ref": "#/$defs/command"}, "functional": {"$ref": "#/$defs/command"},
+        "faultInjection": {"$ref": "#/$defs/command"}, "coverage": {"$ref": "#/$defs/command"}, "performance": {"$ref": "#/$defs/command"},
+        "security": {"$ref": "#/$defs/command"}, "deploy": {"$ref": "#/$defs/command"}, "rollback": {"$ref": "#/$defs/command"}
+      }
+    },
+    "knowledge": {
+      "type": "object", "additionalProperties": false, "required": ["architecture", "principles", "reviewGuidance", "similarProducts"],
+      "properties": {"architecture": {"$ref": "#/$defs/path"}, "principles": {"$ref": "#/$defs/path"}, "reviewGuidance": {"$ref": "#/$defs/path"}, "similarProducts": {"$ref": "#/$defs/path"}}
+    },
+    "security": {
+      "type": "object", "additionalProperties": false, "required": ["blockingSeverities", "providers", "allowExternalSourceSharing"],
+      "properties": {
+        "blockingSeverities": {"type": "array", "uniqueItems": true, "minItems": 2, "maxItems": 2, "items": {"enum": ["critical", "high"]}},
+        "providers": {"type": "array", "items": {"$ref": "#/$defs/text"}},
+        "allowExternalSourceSharing": {"type": "boolean"}
+      }
+    },
+    "monitoring": {
+      "type": "object", "additionalProperties": false, "required": ["enabled", "releaseInventory"],
+      "properties": {"enabled": {"type": "boolean"}, "releaseInventory": {"$ref": "#/$defs/path"}}
+    },
+    "review": {
+      "type": "object", "additionalProperties": false, "required": ["repository"],
+      "properties": {"repository": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/repository"}]}}
+    }
+  }
+}

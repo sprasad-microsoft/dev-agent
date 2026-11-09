@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "replace-with-workspace-name",
+    "onboardingComplete": false
+  },
+  "skills": {
+    "design": ".github/skills/dev-design/SKILL.md",
+    "implementation": ".github/skills/dev-implementation/SKILL.md",
+    "testing": ".github/skills/dev-testing/SKILL.md",
+    "debugging": ".github/skills/dev-debugging/SKILL.md",
+    "deployment": ".github/skills/dev-deployment/SKILL.md",
+    "documentation": ".github/skills/dev-documentation/SKILL.md",
+    "security": ".github/skills/dev-security/SKILL.md",
+    "dependency-security": ".github/skills/dev-dependency-security/SKILL.md",
+    "review": ".github/skills/dev-review/SKILL.md",
+    "knowledge-base": ".github/skills/dev-knowledge-base/SKILL.md"
+  },
+  "commands": {
+    "build": null,
+    "unit": null,
+    "functional": null,
+    "faultInjection": null,
+    "coverage": null,
+    "performance": null,
+    "security": null,
+    "deploy": null,
+    "rollback": null
+  },
+  "knowledge": {
+    "architecture": ".dev-agent/knowledge/architecture.md",
+    "principles": ".dev-agent/knowledge/principles.md",
+    "reviewGuidance": ".dev-agent/knowledge/review-guidance.md",
+    "similarProducts": ".dev-agent/knowledge/similar-products.md"
+  },
+  "security": {
+    "blockingSeverities": ["critical", "high"],
+    "providers": [],
+    "allowExternalSourceSharing": false
+  },
+  "monitoring": {
+    "enabled": false,
+    "releaseInventory": ".dev-agent/releases.json"
+  },
+  "review": {
+    "repository": null
+  }
+}

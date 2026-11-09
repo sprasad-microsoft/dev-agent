@@ -1,0 +1,44 @@
+name: Dev Agent workspace validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      feature_id:
+        description: Optional locally committed sanitized feature ID to validate
+        required: false
+        type: string
+      gate:
+        description: Evidence gate (does not authorize deployment)
+        type: choice
+        options: [design, implementation, release, closure]
+        default: implementation
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+      - name: Check workspace configuration
+        run: node .dev-agent/tools/dev-agent.mjs project-check
+      - name: Validate an explicitly supplied sanitized feature record
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.feature_id != '' }}
+        env:
+          FEATURE_ID: ${{ inputs.feature_id }}
+          GATE: ${{ inputs.gate }}
+        shell: bash
+        run: node .dev-agent/tools/dev-agent.mjs feature-check --id "$FEATURE_ID" --gate "$GATE"
+
+# Private records are ignored by default and are not available in CI. A real
+# protected release workflow must supply trusted evidence and approvals using
+# your organization's approved storage/identity mechanism, not untrusted PR JSON.

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "name": "dev-agent",
+    "onboardingComplete": true
+  },
+  "skills": {
+    "design": ".github/skills/dev-design/SKILL.md",
+    "implementation": ".github/skills/dev-implementation/SKILL.md",
+    "testing": ".github/skills/dev-testing/SKILL.md",
+    "debugging": ".github/skills/dev-debugging/SKILL.md",
+    "deployment": ".github/skills/dev-deployment/SKILL.md",
+    "documentation": ".github/skills/dev-documentation/SKILL.md",
+    "security": ".github/skills/dev-security/SKILL.md",
+    "dependency-security": ".github/skills/dev-dependency-security/SKILL.md",
+    "review": ".github/skills/dev-review/SKILL.md",
+    "knowledge-base": ".github/skills/dev-knowledge-base/SKILL.md"
+  },
+  "commands": {
+    "build": "npm run validate",
+    "unit": "npm test",
+    "functional": "npm test",
+    "faultInjection": "npm test",
+    "coverage": "npm run test:coverage",
+    "performance": null,
+    "security": "npm audit --audit-level=high",
+    "deploy": null,
+    "rollback": null
+  },
+  "knowledge": {
+    "architecture": ".dev-agent/knowledge/architecture.md",
+    "principles": ".dev-agent/knowledge/principles.md",
+    "reviewGuidance": ".dev-agent/knowledge/review-guidance.md",
+    "similarProducts": ".dev-agent/knowledge/similar-products.md"
+  },
+  "security": {
+    "blockingSeverities": ["critical", "high"],
+    "providers": [],
+    "allowExternalSourceSharing": false
+  },
+  "monitoring": {
+    "enabled": true,
+    "releaseInventory": ".dev-agent/releases.json"
+  },
+  "review": {
+    "repository": "sprasad-microsoft/dev-agent"
+  }
+}
