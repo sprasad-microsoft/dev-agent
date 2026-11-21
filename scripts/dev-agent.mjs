@@ -20,7 +20,9 @@ Usage: node scripts\\dev-agent.mjs COMMAND [FLAGS]
   --help | help
   install --target PATH [--apply | --dry-run] [--monitoring]
   install --global [--agents-only] [--apply | --dry-run]
+  install --global --skill-only [--apply | --dry-run]
   install --target PATH --agents-only [--apply | --dry-run]
+  install --target PATH --skill-only [--apply | --dry-run]
   feature-init --id SLUG [--workspace PATH]
   feature-check --id SLUG --gate design|implementation|release|closure [--workspace PATH]
   feature-status --id SLUG [--workspace PATH]
@@ -36,7 +38,9 @@ directory, with no source/target overlap, symlinks or differing destination file
 current user, shared by VS Code's Copilot harness and GitHub Copilot CLI.
 --agents-only installs the three agents and license, without skills, workspace
 configuration or runtime tools. It also works with --target.
-Global/agents-only installs do not provide workspace evidence tools or knowledge.
+--skill-only installs complete skill directories and license, leaving existing
+agents untouched. It works with --global or --target and conflicts with --agents-only.
+Global or partial installs do not provide workspace evidence tools or knowledge.
 --global cannot be combined with --target; --monitoring requires a full workspace
 installation. Global installation never executes or modifies client settings.
 --monitoring copies monitoring files only; it does not enable configuration or
@@ -83,7 +87,7 @@ Inventory checks structure only, not vulnerability absence or completeness.
 
 const OPTIONS = {
   help: [],
-  install: ['target', 'apply', 'dry-run', 'monitoring', 'global', 'agents-only'],
+  install: ['target', 'apply', 'dry-run', 'monitoring', 'global', 'agents-only', 'skill-only'],
   'feature-init': ['workspace', 'id'],
   'feature-check': ['workspace', 'id', 'gate'],
   'feature-status': ['workspace', 'id'],
@@ -103,7 +107,7 @@ export function parseArgs(argv) {
     const key = flag.slice(2);
     assert(OPTIONS[command].includes(key), `Unknown flag: ${flag}`);
     assert(!Object.hasOwn(options, key), `Duplicate flag: ${flag}`);
-    if (['apply', 'dry-run', 'monitoring', 'global', 'agents-only'].includes(key)) options[key] = true;
+    if (['apply', 'dry-run', 'monitoring', 'global', 'agents-only', 'skill-only'].includes(key)) options[key] = true;
     else {
       const value = args[++i];
       assert(value !== undefined && !value.startsWith('--') && value.trim(), `Missing value for ${flag}`);
@@ -114,7 +118,8 @@ export function parseArgs(argv) {
   for (const key of command === 'install' && !options.global ? ['target'] : ['feature-init', 'feature-check', 'feature-status'].includes(command) ? ['id'] : command === 'history' ? ['repository', 'output'] : []) assert(options[key], `--${key} is required`);
   if (command === 'install') {
     assert(!options.global || options.target === undefined, '--global and --target conflict');
-    assert(!options.monitoring || (!options.global && !options['agents-only']), '--monitoring requires a full workspace installation');
+    assert(!(options['agents-only'] && options['skill-only']), '--agents-only and --skill-only conflict');
+    assert(!options.monitoring || (!options.global && !options['agents-only'] && !options['skill-only']), '--monitoring requires a full workspace installation');
   }
   if (command === 'feature-check') assert(options.gate, '--gate is required');
   if (command === 'fingerprint') {
@@ -131,7 +136,7 @@ export function run(argv, { cwd = process.cwd(), execute, home } = {}) {
   if (command === 'install') return installWorkspace({
     ...(options.target ? { target: path.resolve(cwd, options.target) } : {}),
     ...(home !== undefined ? { home } : {}),
-    global: !!options.global, agentsOnly: !!options['agents-only'],
+    global: !!options.global, agentsOnly: !!options['agents-only'], skillsOnly: !!options['skill-only'],
     apply: !!options.apply, monitoring: !!options.monitoring,
   });
   const root = workspaceRoot(path.resolve(cwd, options.workspace ?? '.'));

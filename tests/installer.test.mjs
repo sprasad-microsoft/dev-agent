@@ -266,3 +266,48 @@ test('a checkout in the user home is allowed but overlapping global destinations
   assert.throws(() => installWorkspace({ source: home, home, global: true }), /overlap/);
   assert.throws(() => installWorkspace({ source: path.join(home, '.copilot', 'agents'), home, global: true }), /overlap/);
 });
+
+for (const global of [false, true]) test(`skill-only installs complete skills without agents or tooling (global=${global})`, t => {
+  const { source, target } = setup(t);
+  put(source, 'LICENSE', 'Package license');
+  put(source, '.github/skills/dev-design/assets/option.md', 'Option asset');
+  fs.rmSync(path.join(source, '.github', 'agents'), { recursive: true });
+  fs.rmSync(path.join(source, 'scripts'), { recursive: true });
+  fs.rmSync(path.join(source, 'templates'), { recursive: true });
+  const options = { source, skillsOnly: true, ...(global ? { global: true, home: target } : { target }) };
+  const preview = installWorkspace(options);
+  assert.equal(preview.skillsOnly, true);
+  assert.equal(preview.agentsOnly, false);
+  assert.deepEqual(fs.readdirSync(target), []);
+  const root = global ? path.join(target, '.copilot') : target;
+  const prefix = global ? '' : '.github/';
+  put(root, `${prefix}agents/development.agent.md`, 'Consumer agent');
+  if (!global) put(root, '.dev-agent/project.json', 'Consumer config');
+  installWorkspace({ ...options, apply: true });
+  assert.equal(fs.readFileSync(path.join(root, prefix, 'agents', 'development.agent.md'), 'utf8'), 'Consumer agent');
+  assert.deepEqual(fs.readdirSync(path.join(root, prefix, 'agents')), ['development.agent.md']);
+  assert.equal(fs.readdirSync(path.join(root, prefix, 'skills')).length, 10);
+  assert.equal(fs.readFileSync(path.join(root, prefix, 'skills', 'dev-design', 'assets', 'option.md'), 'utf8'), 'Option asset');
+  assert.equal(fs.existsSync(path.join(root, global ? 'dev-agent' : '.dev-agent', 'LICENSE')), true);
+  assert.equal(fs.existsSync(path.join(root, '.dev-agent', 'tools')), false);
+  if (!global) assert.equal(fs.readFileSync(path.join(root, '.dev-agent', 'project.json'), 'utf8'), 'Consumer config');
+  const again = installWorkspace({ ...options, apply: true });
+  assert.ok(again.files.every(file => file.action === 'identical'));
+});
+
+for (const apply of [false, true]) test(`skill-only conflicts preflight the license and all other skills (apply=${apply})`, t => {
+  const { source, target: home } = setup(t);
+  put(source, 'LICENSE', 'Package license');
+  put(home, '.copilot/skills/dev-review/SKILL.md', 'Customized review skill');
+  assert.throws(() => installWorkspace({ source, home, global: true, skillsOnly: true, apply }), /conflict/);
+  assert.equal(fs.existsSync(path.join(home, '.copilot', 'dev-agent')), false);
+  assert.equal(fs.existsSync(path.join(home, '.copilot', 'skills', 'dev-design')), false);
+  assert.equal(fs.readFileSync(path.join(home, '.copilot', 'skills', 'dev-review', 'SKILL.md'), 'utf8'), 'Customized review skill');
+});
+
+test('skill-only rejects incompatible API options before writes', t => {
+  const { source, target } = setup(t);
+  assert.throws(() => installWorkspace({ source, target, agentsOnly: true, skillsOnly: true, apply: true }), /conflict/);
+  assert.throws(() => installWorkspace({ source, target, skillsOnly: true, monitoring: true, apply: true }), /full workspace/);
+  assert.deepEqual(fs.readdirSync(target), []);
+});

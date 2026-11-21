@@ -6,13 +6,17 @@
 complete skill directories into the shared `~/.copilot` locations recognized by
 GitHub Copilot CLI and VS Code's Copilot harness. It does not install workspace
 configuration, knowledge, runtime tools, or monitoring workflows.
+Use `--global --skill-only` to install just the ten complete skill directories
+and package license, leaving existing agents untouched.
 
 `install --target PATH` retains the full workspace installation. Add
 `--agents-only` to copy only the three agents and package license without touching
-existing skills/configuration. `--monitoring` requires a full workspace install.
+existing skills/configuration. Use `--skill-only` instead to install just skills
+and the license. The partial-install flags are mutually exclusive;
+`--monitoring` requires a full workspace install.
 All modes default to dry-run; `--apply` is required to write. Conflicts block
 before writes; identical reruns preserve files. Adding skills later does not
-overwrite customized agents.
+overwrite customized agents when using `--skill-only`.
 
 See [global installation](../README.md#install-globally-for-vs-code-and-github-copilot-cli).
 The current lifecycle still needs workspace-contained skill mappings and

@@ -7,9 +7,10 @@ import { PHASES, validateProject } from './contracts.mjs';
 
 export const PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-export function installWorkspace({ target, source = PACKAGE_ROOT, apply = false, monitoring = false, global = false, agentsOnly = false, home = homedir() }) {
+export function installWorkspace({ target, source = PACKAGE_ROOT, apply = false, monitoring = false, global = false, agentsOnly = false, skillsOnly = false, home = homedir() }) {
   assert(!global || target === undefined, '--global and --target conflict');
-  assert(!monitoring || (!global && !agentsOnly), '--monitoring requires a full workspace installation');
+  assert(!(agentsOnly && skillsOnly), '--agents-only and --skill-only conflict');
+  assert(!monitoring || (!global && !agentsOnly && !skillsOnly), '--monitoring requires a full workspace installation');
   assert(global || typeof target === 'string', '--target is required for workspace installation');
   const root = global ? contained(workspaceRoot(home), '.copilot') : workspaceRoot(target);
   if (fs.existsSync(root)) assert(fs.statSync(root).isDirectory(), 'Installation root must be a directory');
@@ -25,7 +26,7 @@ export function installWorkspace({ target, source = PACKAGE_ROOT, apply = false,
   };
   const license = contained(source, 'LICENSE');
   if (fs.existsSync(license)) add('LICENSE', global ? 'dev-agent/LICENSE' : '.dev-agent/LICENSE');
-  for (const agent of ['development', 'security', 'review']) add(`.github/agents/${agent}.agent.md`, `${global ? '' : '.github/'}agents/${agent}.agent.md`);
+  if (!skillsOnly) for (const agent of ['development', 'security', 'review']) add(`.github/agents/${agent}.agent.md`, `${global ? '' : '.github/'}agents/${agent}.agent.md`);
   if (!agentsOnly) for (const phase of PHASES) {
     const directory = `.github/skills/dev-${phase}`;
     const base = contained(source, directory, { existing: true });
@@ -33,7 +34,7 @@ export function installWorkspace({ target, source = PACKAGE_ROOT, apply = false,
     for (const file of listFiles(base)) add(`${directory}/${file}`, `${global ? '' : '.github/'}skills/dev-${phase}/${file}`);
   }
   let project;
-  if (!global && !agentsOnly) {
+  if (!global && !agentsOnly && !skillsOnly) {
     add('scripts/dev-agent.mjs', '.dev-agent/tools/dev-agent.mjs');
     const monitor = contained(source, 'scripts/monitor-dependencies.mjs');
     if (fs.existsSync(monitor)) add('scripts/monitor-dependencies.mjs', '.dev-agent/tools/monitor-dependencies.mjs');
@@ -83,5 +84,5 @@ export function installWorkspace({ target, source = PACKAGE_ROOT, apply = false,
     noSymlinks(filename);
     fs.writeFileSync(filename, item.content, { flag: 'wx' });
   }
-  return { applied: apply, scope: global ? 'global' : 'workspace', root, agentsOnly, monitoring, files: plan.map(({ destination, exists }) => ({ path: destination, action: exists ? 'identical' : 'create' })) };
+  return { applied: apply, scope: global ? 'global' : 'workspace', root, agentsOnly, skillsOnly, monitoring, files: plan.map(({ destination, exists }) => ({ path: destination, action: exists ? 'identical' : 'create' })) };
 }

@@ -11,7 +11,8 @@ Scope: this tooling repository. Owner: repository maintainers.
   history export, and release inventory validation.
   Global installation copies agents/complete skills to the user's `.copilot`
   directories shared by VS Code's Copilot harness and Copilot CLI. Agents-only
-  installation omits skills and workspace tooling; full workspace mode remains
+  installation omits skills; skill-only installation omits agents. Both omit
+  workspace tooling; full workspace mode remains
   unchanged and copies skill assets along with instructions.
 - `scripts/monitor-dependencies.mjs` orchestrates an explicitly supplied
   OSV-Scanner binary. It cannot install tools, approve fixes, or deploy.

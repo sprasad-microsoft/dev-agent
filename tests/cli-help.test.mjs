@@ -29,6 +29,7 @@ test('help lists exact syntax, defaults, schemas, report contracts and revision 
     '{requirement,options,selectedOption}', 'SHA-256(file bytes)',
     'does not enable configuration', 'designSecurity', 'rollbackRehearsal',
     'install --global [--agents-only]', 'install --target PATH --agents-only',
+    'install --global --skill-only', 'install --target PATH --skill-only',
   ]) assert.ok(HELP.includes(expected), `Help missing: ${expected}`);
 });
 test('unknown command continues to fail with nonzero exit', t => {
@@ -46,6 +47,11 @@ for (const args of [
   ['install', '--global', '--monitoring'],
   ['install', '--target', '.', '--agents-only', '--monitoring'],
   ['install', '--global', '--global'], ['install', '--global', '--agents-only', '--agents-only'],
+  ['install', '--global', '--skill-only', '--skill-only'],
+  ['install', '--global', '--agents-only', '--skill-only'],
+  ['install', '--target', '.', '--agents-only', '--skill-only'],
+  ['install', '--target', '.', '--skill-only', '--monitoring'],
+  ['install', '--global', '--skill-only', '--monitoring'],
 ]) test(`installer rejects incompatible or duplicate arguments ${JSON.stringify(args)}`, () => {
   assert.throws(() => parseArgs(args));
 });
@@ -84,4 +90,24 @@ test('real global CLI applies to an isolated home and preserves full agent defin
     fs.readFileSync(path.resolve(TEST_ROOT, '..', '.github', 'skills', 'dev-design', 'assets', 'option.md')));
   const again = JSON.parse(execFileSync(process.execPath, [cli, 'install', '--global', '--apply'], options));
   assert.ok(again.files.every(file => file.action === 'identical'));
+});
+
+test('real CLI installs only skills globally or into a workspace', t => {
+  const home = fs.mkdtempSync(path.join(tmpdir(), 'dev-agent-skill-only-'));
+  t.after(() => fs.rmSync(home, { recursive: true, force: true }));
+  const options = { cwd: home, encoding: 'utf8', env: { ...process.env, HOME: home, USERPROFILE: home } };
+  for (const scope of [['--global'], ['--target', home]]) {
+    const preview = JSON.parse(execFileSync(process.execPath, [cli, 'install', ...scope, '--skill-only'], options));
+    assert.equal(preview.skillsOnly, true);
+    assert.ok(preview.files.every(file => file.path.includes('skills/') || file.path.endsWith('/LICENSE')));
+    const result = JSON.parse(execFileSync(process.execPath, [cli, 'install', ...scope, '--skill-only', '--apply'], options));
+    const root = scope[0] === '--global' ? path.join(home, '.copilot') : path.join(home, '.github');
+    assert.equal(result.skillsOnly, true);
+    assert.equal(fs.existsSync(path.join(root, 'agents')), false);
+    assert.equal(fs.readdirSync(path.join(root, 'skills')).length, 10);
+    assert.deepEqual(fs.readFileSync(path.join(root, 'skills', 'dev-design', 'assets', 'option.md')),
+      fs.readFileSync(path.resolve(TEST_ROOT, '..', '.github', 'skills', 'dev-design', 'assets', 'option.md')));
+  }
+  assert.equal(fs.existsSync(path.join(home, '.dev-agent', 'project.json')), false);
+  assert.equal(fs.existsSync(path.join(home, '.dev-agent', 'tools')), false);
 });

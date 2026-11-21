@@ -48,6 +48,9 @@ node scripts/dev-agent.mjs install --global --apply
 
 # Alternative: install only the three agents, skipping all skills.
 node scripts/dev-agent.mjs install --global --agents-only --apply
+
+# Alternative: install only skills, leaving existing agents untouched.
+node scripts/dev-agent.mjs install --global --skill-only --apply
 ```
 
 ### Windows PowerShell
@@ -60,6 +63,9 @@ node scripts\dev-agent.mjs install --global --apply
 
 # Alternative: agents only.
 node scripts\dev-agent.mjs install --global --agents-only --apply
+
+# Alternative: skills only.
+node scripts\dev-agent.mjs install --global --skill-only --apply
 ```
 
 ### Contents and safety
@@ -68,18 +74,22 @@ node scripts\dev-agent.mjs install --global --agents-only --apply
 |---|---|
 | `--global` | `~/.copilot/agents/`: three agents; `~/.copilot/skills/`: ten complete skill directories, including assets |
 | `--global --agents-only` | Three agents only; existing skills are untouched and skipped |
-| Both modes | Package license in `~/.copilot/dev-agent/LICENSE` |
+| `--global --skill-only` | Ten complete skill directories only; existing agents are untouched and skipped |
+| All modes | Package license in `~/.copilot/dev-agent/LICENSE` |
 
 On Windows, `~` is the current user's home directory. The installer creates
 missing destination directories only with `--apply`, refuses symlinks and
 differing existing files before writing, and preserves identical files on rerun.
-To add skills after an agents-only installation, rerun with `--global --apply`.
+To add skills after an agents-only installation without checking or changing
+agents, rerun with `--global --skill-only --apply`.
 Customized agents still require manual merging; there is no force-overwrite.
 
 `--global` cannot be combined with `--target` or `--monitoring`. Global installs
 do not copy workspace configuration, knowledge templates, evidence tools, or CI
-workflows and do not modify client settings. `--agents-only` also works with
-`--target PATH`, installing just workspace agents and the license.
+workflows and do not modify client settings. `--agents-only` and `--skill-only`
+also work with `--target PATH`, installing just the selected workspace files
+and the license. The two partial-install flags are mutually exclusive and
+cannot be combined with `--monitoring`.
 
 Use this on your own user account; no `sudo` is needed. With Remote SSH, WSL,
 or a container, install on the machine where the Copilot harness runs.
